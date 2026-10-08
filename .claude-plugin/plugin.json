@@ -1,0 +1,14 @@
+{
+  "name": "model-picker",
+  "version": "1.0.0",
+  "description": "Colour-coded Claude model picker for Claude Code: model cards with use cases, cost and speed, a Suggest button that ranks the top 3 models for your drafted prompt, and an Auto mode that routes each prompt to the best model.",
+  "author": {
+    "name": "Ricka",
+    "url": "https://github.com/RZZZR01"
+  },
+  "homepage": "https://github.com/RZZZR01/model-picker",
+  "repository": "https://github.com/RZZZR01/model-picker",
+  "license": "MIT",
+  "keywords": ["model", "model-selection", "auto-routing", "haiku", "sonnet", "opus", "fable", "mod"],
+  "types": "./types/index.d.ts"
+}

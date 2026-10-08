@@ -1,0 +1,12 @@
+{
+  "name": "model-picker",
+  "description": "Model Picker: a colour-coded Claude model picker with Suggest and Auto model routing for Claude Code.",
+  "owner": { "name": "Ricka" },
+  "plugins": [
+    {
+      "name": "model-picker",
+      "source": "./",
+      "description": "Pick, compare and auto-select Claude models from a colour-coded band above the prompt."
+    }
+  ]
+}
