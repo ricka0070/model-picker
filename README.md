@@ -24,7 +24,7 @@ prompt you have typed, and an **Auto** mode that routes every prompt you send to
 In a Claude Code terminal session:
 
 ```
-/plugin install model-picker --marketplace RZZZR01/model-picker
+/plugin install model-picker --marketplace ricka0070/model-picker
 ```
 
 Answer `y` to add the marketplace, then pick a scope (user scope loads it in every session).
