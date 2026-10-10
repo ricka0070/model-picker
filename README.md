@@ -2,7 +2,8 @@
 
 Pick the right Claude model without leaving the prompt. Model Picker adds a colour-coded band above
 the prompt box that shows the active model, a **Suggest** button that ranks the top 3 models for the
-prompt you have typed, and an **Auto** mode that routes every prompt you send to the best-suited model.
+prompt you have typed, an **Auto** mode that routes every prompt you send to the best-suited model, and a
+**Project Team Planner** that previews how a team of models would split a bigger task.
 
 <!-- Add a screenshot: docs/band.png -->
 
@@ -15,9 +16,12 @@ prompt you have typed, and an **Auto** mode that routes every prompt you send to
   a quick Haiku 5.5 analysis then refines it.
 - **Auto** (`a`). When on, each prompt you send (Enter or the Send button) is ranked first and answered
   by the top model. The band shows the choice; a toast says which model and its score.
+- **Project Team Planner** (`p`, or `/team-planner`). Splits the prompt you have typed into steps and
+  assigns each step a model, with an estimated cost per step. You choose which model writes the plan.
+  It only plans: nothing runs.
 - **Models panel** (`m`, or `/pick-model`). One card per model: what it is best for, example tasks,
   ratings for smarts and speed, cost tier, price per million tokens and context window.
-- **Commands.** `/pick-model`, `/suggest-model <prompt>`, `/auto-model [on|off]`.
+- **Commands.** `/pick-model`, `/suggest-model <prompt>`, `/auto-model [on|off]`, `/team-planner`.
 
 ## Install
 
@@ -48,18 +52,69 @@ Things worth knowing:
   pick; Auto resumes after that.
 - **Only prompts you send are routed.** Notifications, scheduled tasks, other sessions and other plugins
   are left alone.
-- **The status bar keeps showing the session's model.** Claude Code's own model label does not follow
-  Auto; the band's badge does.
-- **Switching models between prompts** means the new model cannot reuse the previous one's prompt cache,
-  so a mixed conversation can cost a little more than staying on one model.
 - **Auto is off by default** and remembers your choice across sessions.
+
+## Does Auto really change the model?
+
+Yes. Claude Code records which model wrote every reply in the session's transcript, the `.jsonl` file
+under `~/.claude/projects/`, as the `model` field of each assistant row. In testing, the reply to
+"What is 17 × 24?" was recorded as `claude-haiku-5-5`, while the replies just before and after it were
+`claude-sonnet-5-5`: Auto sent that one prompt to Haiku and the next went back to the session's model.
+
+To check it yourself, print the model of each reply in a transcript with Node:
+
+```
+node -e "for (const l of require('fs').readFileSync(process.argv[1],'utf8').split('\n')) { try { const d = JSON.parse(l); if (d.type === 'assistant') console.log(d.message.model) } catch {} }" path/to/session.jsonl
+```
+
+## Why Claude Code's own model label doesn't change
+
+The model name in Claude Code's status bar shows the session's model setting, and Auto leaves that
+setting alone on purpose:
+
+- **Claude Code refuses `/model` from inside the hook a prompt waits on.** That is how Auto would have to
+  change the setting before the prompt is answered; the first version tried it and failed.
+- **Changing it after each answer would lag.** The label would always show the previous prompt's model.
+- **It would throw away the cached conversation.** Each change of the session's model discards the prompt
+  cache, which costs more on every switch.
+- **It would fight with your own picks.** A model you choose with `/model` would keep being overwritten.
+
+So the band's **Active** badge is the place to look. The transcript (above) confirms what actually ran.
+
+## Project Team Planner
+
+Press **Project Team Planner** (`p`) or run `/team-planner`, choose the planner model, then press
+**Plan my prompt**. The planner reads the prompt you have typed and returns:
+
+- 2–6 steps, each with the model it would use, why, and an estimated cost from the planner's own token
+  guess at list prices;
+- a team estimate beside "all on Opus" and "all on Sonnet", so you can see whether splitting saves money;
+- one line of advice on whether splitting is worth it for this task;
+- what the plan itself cost, from the planner call's reported token usage.
+
+**Add plan to my prompt** appends the plan to your draft so you can send it as instructions. The planner
+never runs the steps. For small and medium prompts one model is usually cheaper and just as good;
+splitting pays off on big jobs with clearly separate parts.
 
 ## Privacy and cost
 
-Suggest and Auto send the text of your prompt (up to its first 8,000 characters) to Claude Haiku 5.5
-through your own Claude Code account, to rank it. Nothing goes anywhere else. Each analysis is a few
-hundred to a few thousand tokens on Haiku 5.5, a fraction of a cent at API rates; on a subscription plan
-it counts toward your usage. With Auto off and Suggest unused, the mod makes no model calls.
+Suggest, Auto and the Planner send the text of your prompt (up to its first 8,000 characters) to a Claude
+model through your own Claude Code account. Nothing goes anywhere else. On a subscription plan these calls
+count toward your usage. With Auto off and Suggest and the Planner unused, the mod makes no model calls.
+
+Rough costs at Anthropic's list prices (the author's estimates from typical token counts):
+
+| What | Model | Rough cost |
+| --- | --- | --- |
+| One **Suggest** press | Haiku 5.5 | about $0.0003 |
+| **Auto**, per prompt you send | Haiku 5.5 | about $0.0003 (the same analysis as Suggest) |
+| One team plan | Haiku 5.5 | about $0.001 |
+| One team plan | Sonnet 5.5 | about $0.02 |
+| One team plan | Opus 5.5 | about $0.04 |
+
+The plan costs cover writing the plan only; running its steps would cost more. Separately, a conversation
+that switches models between prompts cannot reuse the previous model's prompt cache, so it can cost a
+little more than staying on one model.
 
 ## The models
 
@@ -79,6 +134,8 @@ scoring.
 - Buttons use Claude Code's own primary/secondary styles; a mod cannot colour a button, so Suggest is
   black or white depending on your theme.
 - Auto adds a short wait before each prompt while the analysis runs (usually a second or two, at most 8).
+- The Planner's step costs are the planner model's guesses, not measurements.
+- Auto has been tested in the Claude desktop app's Code tab; terminal sessions use the same hooks.
 
 ## Development
 

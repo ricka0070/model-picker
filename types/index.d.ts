@@ -10,6 +10,19 @@ export type Suggestion = {
 /** The model Auto picked for the last prompt the person sent. */
 export type RoutedModel = { id: string; score: number; task: string }
 
+/** One step of a team plan: what it does, the model it is assigned, and the planner's token guess. */
+export type PlanStep = { title: string; model: string; why: string; inputTokens: number; outputTokens: number }
+
+/** A Project Team Planner result. A preview only: nothing is run. */
+export type TeamPlan = {
+  planner: string
+  summary: string
+  advice: string
+  steps: PlanStep[]
+  /** What the plan call itself cost, from its reported token usage at list prices. */
+  planCostUsd: number
+}
+
 declare module 'claude-code' {
   interface PluginState {
     'model-picker': {
@@ -23,6 +36,11 @@ declare module 'claude-code' {
       routed: RoutedModel | null
       /** The model Auto chose for the turn now running; `turn.step` applies it to that turn's requests. */
       override: string | null
+      /** The model chosen to write team plans. */
+      planner: string
+      teamPlan: TeamPlan | null
+      planBusy: boolean
+      planError: string | null
     }
   }
 }

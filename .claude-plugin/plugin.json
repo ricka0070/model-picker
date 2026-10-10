@@ -1,7 +1,7 @@
 {
   "name": "model-picker",
-  "version": "1.0.0",
-  "description": "Colour-coded Claude model picker for Claude Code: model cards with use cases, cost and speed, a Suggest button that ranks the top 3 models for your drafted prompt, and an Auto mode that routes each prompt to the best model.",
+  "version": "1.1.0",
+  "description": "Colour-coded Claude model picker for Claude Code: model cards with use cases, cost and speed, a Suggest button that ranks the top 3 models for your drafted prompt, an Auto mode that routes each prompt to the best model, and a Project Team Planner that previews how a team of models would split a task.",
   "author": {
     "name": "Ricka",
     "url": "https://github.com/ricka0070"

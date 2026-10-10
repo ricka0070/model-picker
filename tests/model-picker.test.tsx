@@ -1,6 +1,6 @@
 import { expect, test } from 'claude-code/testing'
 
-import { parseAiRanking, scorePrompt } from '../hooks/models'
+import { MODELS, formatUsd, parseAiRanking, parsePlan, scorePrompt, usd } from '../hooks/models'
 
 const BAND = {
   plugin: 'model-picker',
@@ -100,4 +100,61 @@ test('Auto button turns automatic model choice on and off', async ($, on) => {
   await band.press({ key: 'auto' })
   expect(await band.find({ key: 'auto', type: 'Button', text: /Auto: OFF/ })).toBeDefined()
   await band.unmount()
+})
+
+test('plan parser keeps valid steps and costs follow list prices', async () => {
+  const plan = parsePlan(
+    'Here: {"summary":"Build and check a sign-up endpoint","advice":"Worth splitting.","steps":[' +
+      '{"title":"Design the endpoint","model":"claude-opus-5-5","why":"Needs judgment","inputTokens":2000,"outputTokens":1000},' +
+      '{"title":"Bogus","model":"gpt-x","why":"skip me","inputTokens":1,"outputTokens":1},' +
+      '{"title":"Write tests","model":"claude-haiku-5-5","why":"Routine","inputTokens":-5,"outputTokens":"300"}]}',
+  )
+  expect(plan?.steps.map(s => s.model)).toEqual(['claude-opus-5-5', 'claude-haiku-5-5'])
+  expect(plan?.steps[1]?.inputTokens).toBe(0)
+  expect(plan?.steps[1]?.outputTokens).toBe(300)
+  expect(parsePlan('not json')).toBeUndefined()
+
+  const opus = MODELS.find(m => m.id === 'claude-opus-5-5')
+  if (!opus) throw new Error('no opus')
+  expect(usd(1_000_000, 0, opus)).toBe(4)
+  expect(formatUsd(0.014)).toBe('$0.014')
+  expect(formatUsd(0.0002)).toBe('<$0.001')
+})
+
+const PLANNER_PANE = { ...PANE, requestId: 'team-planner', props: { ...PANE.props, title: 'Project Team Planner' } }
+
+test('Project Team Planner plans the drafted prompt with the chosen model', async ($, on) => {
+  const asked: string[] = []
+  on('prompt.read', () => ({ value: { text: 'Build a sign-up endpoint with tests', cursor: 0 } }))
+  on('model.complete', (_$, e) => {
+    asked.push(e.model)
+    return {
+      value: {
+        isAnswered: true,
+        text:
+          '{"summary":"Design, build and test sign-up","advice":"Splitting saves a little.","steps":[' +
+          '{"title":"Design the API","model":"claude-opus-5-5","why":"Judgment calls","inputTokens":2000,"outputTokens":1000},' +
+          '{"title":"Write unit tests","model":"claude-haiku-5-5","why":"Routine","inputTokens":1500,"outputTokens":800}]}',
+        usage: { input_tokens: 1000, output_tokens: 500, cache_creation_input_tokens: 0, cache_read_input_tokens: 0 },
+      },
+    }
+  })
+
+  for (const surface of ['terminal', 'desktop'] as const) {
+    const pane = await $.ui.mount({ ...PLANNER_PANE, surface })
+    expect(await pane.find({ key: 'planner-claude-haiku-5-5', type: 'Button', text: /about \$0\.001/ })).toBeDefined()
+    expect(await pane.find({ key: 'planner-claude-sonnet-5-5', type: 'Button', text: /about \$0\.02/ })).toBeDefined()
+    expect(await pane.find({ key: 'planner-claude-opus-5-5', type: 'Button', text: /about \$0\.04/ })).toBeDefined()
+
+    await pane.press({ key: 'planner-claude-opus-5-5' })
+    await pane.press({ key: 'make-plan' })
+    expect(asked.at(-1)).toBe('claude-opus-5-5')
+    expect(await pane.find({ key: 'step-0' })).toBeDefined()
+    expect(await pane.find({ key: 'step-1' })).toBeDefined()
+    expect(await pane.find({ type: 'Text', text: /Team estimate/ })).toBeDefined()
+    // 1000 input + 500 output tokens on Opus 5.5 at $4 / $20 per million.
+    expect(await pane.find({ type: 'Text', text: /This plan cost \$0\.014 on Opus 5\.5/ })).toBeDefined()
+    expect(await pane.find({ key: 'copy-plan' })).toBeDefined()
+    await pane.unmount()
+  }
 })

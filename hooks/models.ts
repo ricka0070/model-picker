@@ -1,4 +1,4 @@
-import type { ModelPick } from '../types'
+import type { ModelPick, PlanStep } from '../types'
 
 export type ModelInfo = {
   id: string
@@ -259,6 +259,59 @@ export function parseAiRanking(text: string): { task: string; picks: ModelPick[]
     return {
       task: typeof raw.task === 'string' ? raw.task.slice(0, 60) : 'Task',
       picks: picks.slice(0, 3),
+    }
+  } catch {
+    return undefined
+  }
+}
+
+/** Models that can write a team plan, with the rough cost of one plan at list prices. */
+export const PLANNERS = [
+  { id: 'claude-haiku-5-5', roughCost: 'about $0.001' },
+  { id: 'claude-sonnet-5-5', roughCost: 'about $0.02' },
+  { id: 'claude-opus-5-5', roughCost: 'about $0.04' },
+] as const
+
+/** Dollars for a token count at a model's list prices. */
+export const usd = (inputTokens: number, outputTokens: number, m: ModelInfo) =>
+  (inputTokens * m.price[0] + outputTokens * m.price[1]) / 1_000_000
+
+export function formatUsd(n: number): string {
+  if (n < 0.001) return '<$0.001'
+  if (n < 0.1) return `$${n.toFixed(3)}`
+  return `$${n.toFixed(2)}`
+}
+
+
+/** Reads the JSON a planner model returns; undefined when it does not fit. */
+export function parsePlan(text: string): { summary: string; advice: string; steps: PlanStep[] } | undefined {
+  const start = text.indexOf('{')
+  const end = text.lastIndexOf('}')
+  if (start < 0 || end <= start) return undefined
+  try {
+    const raw = JSON.parse(text.slice(start, end + 1)) as {
+      summary?: unknown
+      advice?: unknown
+      steps?: Array<{ title?: unknown; model?: unknown; why?: unknown; inputTokens?: unknown; outputTokens?: unknown }>
+    }
+    if (!Array.isArray(raw.steps)) return undefined
+    const tokens = (n: unknown) => Math.round(clamp(Number(n) || 0, 0, 500_000))
+    const steps: PlanStep[] = []
+    for (const s of raw.steps.slice(0, 8)) {
+      if (typeof s.model !== 'string' || !byId(s.model) || typeof s.title !== 'string') continue
+      steps.push({
+        title: s.title.slice(0, 80),
+        model: s.model,
+        why: typeof s.why === 'string' ? s.why.slice(0, 140) : '',
+        inputTokens: tokens(s.inputTokens),
+        outputTokens: tokens(s.outputTokens),
+      })
+    }
+    if (steps.length === 0) return undefined
+    return {
+      summary: typeof raw.summary === 'string' ? raw.summary.slice(0, 200) : '',
+      advice: typeof raw.advice === 'string' ? raw.advice.slice(0, 200) : '',
+      steps,
     }
   } catch {
     return undefined
