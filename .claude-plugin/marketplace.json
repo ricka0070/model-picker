@@ -1,7 +1,7 @@
 {
   "name": "model-picker",
   "description": "Model Picker: a colour-coded Claude model picker with Suggest and Auto model routing for Claude Code.",
-  "owner": { "name": "Ricka" },
+  "owner": { "name": "Ricard Falendys" },
   "plugins": [
     {
       "name": "model-picker",
