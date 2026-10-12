@@ -37,8 +37,8 @@ const routed = atom({ plugin: 'model-picker', key: 'routed' } as const, null as 
 // The model Auto chose for the turn now starting; applied to its requests by `turn.step`, cleared when it ends.
 const override = atom({ plugin: 'model-picker', key: 'override' } as const, null as string | null)
 
-const PLANNER_PANE = 'team-planner'
-const PLANNER_TITLE = 'Project Team Planner'
+const PLANNER_PANE = 'models-team-plan'
+const PLANNER_TITLE = 'Models Team Plan'
 const planner = atom({ plugin: 'model-picker', key: 'planner' } as const, 'claude-sonnet-5-5')
 const teamPlan = atom({ plugin: 'model-picker', key: 'teamPlan' } as const, null as TeamPlan | null)
 const planBusy = atom({ plugin: 'model-picker', key: 'planBusy' } as const, false)
@@ -143,7 +143,7 @@ async function routeAuto($: $, text: string) {
   $.ui.toast(`Auto: ${model.icon} ${model.name} (${top.score}%) for this prompt`)
 }
 
-/** Project Team Planner: asks the chosen planner model to split the drafted prompt into steps. Runs nothing. */
+/** Models Team Plan: asks the chosen planner model to split the drafted prompt into steps. Runs nothing. */
 async function makePlan($: $, text: string) {
   if (!text.trim()) {
     $.ui.toast('Write your prompt first, then press Plan my prompt')
@@ -230,7 +230,7 @@ export const register: Register = on => {
       argumentHint: '[on|off]',
     })
     await $.command.register({
-      name: 'team-planner',
+      name: 'models-team-plan',
       description: 'Plan how a team of Claude models would split your drafted prompt (preview only)',
     })
 
@@ -269,7 +269,7 @@ export const register: Register = on => {
     return { text: `Auto model choice ${isOn ? 'on' : 'off'}.` }
   })
 
-  on('command.run', { command: 'team-planner' }, async $ => {
+  on('command.run', { command: 'models-team-plan' }, async $ => {
     await $.ui.open({ id: PLANNER_PANE, title: PLANNER_TITLE })
 
     return { text: `${PLANNER_TITLE} opened.` }

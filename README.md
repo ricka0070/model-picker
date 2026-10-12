@@ -3,7 +3,7 @@
 Pick the right Claude model without leaving the prompt. Model Picker adds a colour-coded band above
 the prompt box that shows the active model, a **Suggest** button that ranks the top 3 models for the
 prompt you have typed, an **Auto** mode that routes every prompt you send to the best-suited model, and a
-**Project Team Planner** that previews how a team of models would split a bigger task.
+**Models Team Plan** that previews how a team of models would split a bigger task.
 
 <!-- Add a screenshot: docs/band.png -->
 
@@ -16,12 +16,12 @@ prompt you have typed, an **Auto** mode that routes every prompt you send to the
   a quick Haiku 5.5 analysis then refines it.
 - **Auto** (`a`). When on, each prompt you send (Enter or the Send button) is ranked first and answered
   by the top model. The band shows the choice; a toast says which model and its score.
-- **Project Team Planner** (`p`, or `/team-planner`). Splits the prompt you have typed into steps and
+- **Models Team Plan** (`p`, or `/models-team-plan`). Splits the prompt you have typed into steps and
   assigns each step a model, with an estimated cost per step. You choose which model writes the plan.
   It only plans: nothing runs.
 - **Models panel** (`m`, or `/pick-model`). One card per model: what it is best for, example tasks,
   ratings for smarts and speed, cost tier, price per million tokens and context window.
-- **Commands.** `/pick-model`, `/suggest-model <prompt>`, `/auto-model [on|off]`, `/team-planner`.
+- **Commands.** `/pick-model`, `/suggest-model <prompt>`, `/auto-model [on|off]`, `/models-team-plan`.
 
 ## Install
 
@@ -81,9 +81,9 @@ setting alone on purpose:
 
 So the band's **Active** badge is the place to look. The transcript (above) confirms what actually ran.
 
-## Project Team Planner
+## Models Team Plan
 
-Press **Project Team Planner** (`p`) or run `/team-planner`, choose the planner model, then press
+Press **Models Team Plan** (`p`) or run `/models-team-plan`, choose the planner model, then press
 **Plan my prompt**. The planner reads the prompt you have typed and returns:
 
 - 2–6 steps, each with the model it would use, why, and an estimated cost from the planner's own token

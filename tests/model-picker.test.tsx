@@ -121,9 +121,9 @@ test('plan parser keeps valid steps and costs follow list prices', async () => {
   expect(formatUsd(0.0002)).toBe('<$0.001')
 })
 
-const PLANNER_PANE = { ...PANE, requestId: 'team-planner', props: { ...PANE.props, title: 'Project Team Planner' } }
+const PLANNER_PANE = { ...PANE, requestId: 'models-team-plan', props: { ...PANE.props, title: 'Models Team Plan' } }
 
-test('Project Team Planner plans the drafted prompt with the chosen model', async ($, on) => {
+test('Models Team Plan plans the drafted prompt with the chosen model', async ($, on) => {
   const asked: string[] = []
   on('prompt.read', () => ({ value: { text: 'Build a sign-up endpoint with tests', cursor: 0 } }))
   on('model.complete', (_$, e) => {

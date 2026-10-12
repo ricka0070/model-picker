@@ -13,7 +13,7 @@ export type RoutedModel = { id: string; score: number; task: string }
 /** One step of a team plan: what it does, the model it is assigned, and the planner's token guess. */
 export type PlanStep = { title: string; model: string; why: string; inputTokens: number; outputTokens: number }
 
-/** A Project Team Planner result. A preview only: nothing is run. */
+/** A Models Team Plan result. A preview only: nothing is run. */
 export type TeamPlan = {
   planner: string
   summary: string
