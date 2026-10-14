@@ -331,7 +331,7 @@ export const register: Register = on => {
     const current = (isAuto && last && byId(last.id)) || matchModel(reported)
 
     const badge = (m: ModelInfo) => (
-      <Text backgroundColor={m.color} color="black" bold>
+      <Text backgroundColor={m.color} color="black" bold wrap="truncate">
         {` ${m.icon} ${m.name} `}
       </Text>
     )
@@ -343,15 +343,24 @@ export const register: Register = on => {
 
       return (
         <Box key={`pick-${m.id}`} gap={1}>
-          <Text dimColor>{`#${i + 1}`}</Text>
-          {badge(m)}
-          <Text color={m.color}>{bar(p.score)}</Text>
-          <Text bold>{`${String(p.score).padStart(2)}%`}</Text>
-          {isCurrent ? (
-            <Text color="success">✓ in use</Text>
-          ) : (
-            <Button key={`use-${m.id}`} hotkey={String(i + 1)} label="Use" onPress={() => useModel($, m)} />
-          )}
+          {/* Everything but the reason keeps its width, so a long reason is cut instead of wrapping the badge. */}
+          <Box flexShrink={0}>
+            <Text dimColor>{`#${i + 1}`}</Text>
+          </Box>
+          <Box flexShrink={0}>{badge(m)}</Box>
+          <Box flexShrink={0}>
+            <Text color={m.color}>{bar(p.score)}</Text>
+          </Box>
+          <Box flexShrink={0}>
+            <Text bold>{`${String(p.score).padStart(2)}%`}</Text>
+          </Box>
+          <Box flexShrink={0}>
+            {isCurrent ? (
+              <Text color="success">✓ in use</Text>
+            ) : (
+              <Button key={`use-${m.id}`} hotkey={String(i + 1)} label="Use" onPress={() => useModel($, m)} />
+            )}
+          </Box>
           <Text dimColor wrap="truncate-end">
             {p.why}
           </Text>
@@ -363,7 +372,11 @@ export const register: Register = on => {
       <Box flexDirection="column">
         <Box gap={1}>
           <Text color="success" bold>Active:</Text>
-          {current ? badge(current) : <Text>{reported}</Text>}
+          {current ? (
+            <Text color={current.color} bold>{`▐  ${current.icon} ${current.name}  ▌`}</Text>
+          ) : (
+            <Text>{reported}</Text>
+          )}
           <Button
             key="suggest"
             hotkey="s"
@@ -476,23 +489,39 @@ export const register: Register = on => {
         </Box>
         {sug && (
           <Box flexDirection="column">
+            <Text bold>Model picking reasoning</Text>
             {sug.picks.map((p, i) => {
               const m = byId(p.id)
               if (!m) return null
               return (
-                <Box key={`pane-pick-${m.id}`} gap={1}>
-                  <Text bold>{`#${i + 1}`}</Text>
-                  <Text color={m.color} bold>{`${m.icon} ${m.name.padEnd(10)}`}</Text>
-                  <Text color={m.color}>{bar(p.score, 12)}</Text>
-                  <Text bold>{`${p.score}%`}</Text>
-                  <Text dimColor wrap="truncate-end">
-                    {p.why}
-                  </Text>
+                <Box key={`pane-pick-${m.id}`} flexDirection="column">
+                  <Box gap={1}>
+                    <Box flexShrink={0}>
+                      <Text bold>{`#${i + 1}`}</Text>
+                    </Box>
+                    <Box flexShrink={0}>
+                      <Text color={m.color} bold>{`${m.icon} ${m.name}`}</Text>
+                    </Box>
+                    <Box flexShrink={0}>
+                      <Text color={m.color}>{bar(p.score, 8)}</Text>
+                    </Box>
+                    <Box flexShrink={0}>
+                      <Text bold>{`${p.score}%`}</Text>
+                    </Box>
+                  </Box>
+                  {/* The reason sits on its own lines under the model and wraps, so it can be read in full. */}
+                  <Box paddingLeft={3} paddingBottom={1}>
+                    <Text dimColor>{p.why}</Text>
+                  </Box>
                 </Box>
               )
             })}
           </Box>
         )}
+        <Box flexDirection="column">
+          <Text dimColor wrap="truncate">{'─'.repeat(60)}</Text>
+          <Text bold>Models guide</Text>
+        </Box>
         {MODELS.map(card)}
       </Box>
     )
