@@ -12,15 +12,18 @@ prompt you have typed, an **Auto** mode that routes every prompt you send to the
 - **Active model badge.** The model in use, as a coloured badge: ✦ Fable 5.1 (purple),
   ◆ Opus 5.5 (orange), ● Sonnet 5.5 (blue), ▲ Haiku 5.5 (green).
 - **Suggest** (`s`). Reads the prompt you have typed but not sent and ranks the top 3 models with a
-  suitability score, a reason and a **Use** button (`1`–`3`). An instant offline estimate appears first;
-  a quick Haiku 5.5 analysis then refines it.
+  suitability score, a reason and a **Use** button (`1`–`3`), one row each. An instant offline estimate
+  appears first; a quick Haiku 5.5 analysis then refines it.
 - **Auto** (`a`). When on, each prompt you send (Enter or the Send button) is ranked first and answered
   by the top model. The band shows the choice; a toast says which model and its score.
 - **Models Team Plan** (`p`, or `/models-team-plan`). Splits the prompt you have typed into steps and
   assigns each step a model, with an estimated cost per step. You choose which model writes the plan.
   It only plans: nothing runs.
-- **Models panel** (`m`, or `/pick-model`). One card per model: what it is best for, example tasks,
-  ratings for smarts and speed, cost tier, price per million tokens and context window.
+- **Models panel** (`m`, or `/pick-model`). Two sections:
+  - **Model picking reasoning**: the latest suggestion's top 3, each with its full reason written out
+    underneath.
+  - **Models guide**: one card per model, with what it is best for, example tasks, ratings for smarts
+    and speed, cost tier, price per million tokens and context window.
 - **Commands.** `/pick-model`, `/suggest-model <prompt>`, `/auto-model [on|off]`, `/models-team-plan`.
 
 ## Install
@@ -145,6 +148,10 @@ claude plugin test .
 ```
 
 Run it from a working copy without installing: `claude --plugin-dir /path/to/model-picker`.
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for what changed in each version.
 
 ## License
 
