@@ -391,16 +391,6 @@ export const register: Register = on => {
             label={PLANNER_TITLE}
             onPress={() => $.ui.open({ id: PLANNER_PANE, title: PLANNER_TITLE })}
           />
-          {isAuto && last && (
-            <Text dimColor wrap="truncate-end">
-              {`last auto pick: ${byId(last.id)?.name} (${last.score}%)`}
-            </Text>
-          )}
-          {sug && (
-            <Text dimColor wrap="truncate-end">
-              {`${sug.task} · ${sug.source === 'ai' ? 'AI-ranked' : isBusy ? 'quick estimate, refining…' : 'quick estimate'}`}
-            </Text>
-          )}
           {sug && <Button key="clear" label="×" plain onPress={() => update($, suggestion, () => null)} />}
         </Box>
         {sug && sug.picks.map(pickRow)}

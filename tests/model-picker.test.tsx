@@ -74,7 +74,6 @@ test('Suggest ranks the drafted prompt in the band and the pane', async ($, on) 
     await band.press({ key: 'suggest' })
     expect(await band.find({ key: 'pick-claude-haiku-5-5' })).toBeDefined()
     expect(await band.find({ type: 'Text', text: /96%/ })).toBeDefined()
-    expect(await band.find({ type: 'Text', text: /AI-ranked/ })).toBeDefined()
     // Opus is the session's model, so it reads "in use" rather than offering Use.
     expect(await band.find({ key: 'use-claude-opus-5-5' })).toBeUndefined()
 
